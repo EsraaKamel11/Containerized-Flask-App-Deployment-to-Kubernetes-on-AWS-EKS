@@ -109,7 +109,3 @@ aws ssm put-parameter --name "JWT_SECRET" --value "<your-secret>" --type "Secure
 - The Flask application is deployed on a Kubernetes cluster managed by AWS EKS.
 - The application is publicly accessible via an external IP address.
 - A CI/CD pipeline automates testing, building, and deployment.
-
-## Demo
-
-Add screenshots, GIFs, or a link to the deployed app here.
