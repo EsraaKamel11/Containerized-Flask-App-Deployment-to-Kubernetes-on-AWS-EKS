@@ -1,88 +1,115 @@
-# Deploying a Flask API
+# Containerized Flask App Deployment on AWS EKS with Kubernetes
 
-This is the project starter repo for the course Server Deployment, Containerization, and Testing.
+This repository demonstrates how to containerize and deploy a Flask API to a Kubernetes cluster using **Docker**, **AWS EKS**, **CodePipeline**, and **CodeBuild**.
 
-In this project you will containerize and deploy a Flask API to a Kubernetes cluster using Docker, AWS EKS, CodePipeline, and CodeBuild.
+The project includes a simple API with three endpoints, containerized for scalability, and deployed to a production-ready environment using AWS tools. A CI/CD pipeline is implemented to automate testing, building, and deployment.
 
-The Flask app that will be used for this project consists of a simple API with three endpoints:
+## Features
 
-- `GET '/'`: This is a simple health check, which returns the response 'Healthy'. 
-- `POST '/auth'`: This takes a email and password as json arguments and returns a JWT based on a custom secret.
-- `GET '/contents'`: This requires a valid JWT, and returns the un-encrpyted contents of that token. 
+### Flask API Endpoints
+- **GET `/`**: Health check endpoint, returns `Healthy`.
+- **POST `/auth`**: Accepts an email and password as JSON arguments, returns a JWT based on a custom secret.
+- **GET `/contents`**: Requires a valid JWT and returns the decrypted contents of the token.
 
-The app relies on a secret set as the environment variable `JWT_SECRET` to produce a JWT. The built-in Flask server is adequate for local development, but not production, so you will be using the production-ready [Gunicorn](https://gunicorn.org/) server when deploying the app.
-
-
+### Deployment Highlights
+- Containerized the Flask application with Docker.
+- Deployed the container to Kubernetes on AWS EKS.
+- Configured a CI/CD pipeline using AWS CodePipeline and CodeBuild.
+- Automated secret management using AWS Parameter Store.
+- Exposed the application publicly via a Kubernetes service.
 
 ## Prerequisites
 
-* Docker Desktop - Installation instructions for all OSes can be found <a href="https://docs.docker.com/install/" target="_blank">here</a>.
-* Git: <a href="https://git-scm.com/downloads" target="_blank">Download and install Git</a> for your system. 
-* Code editor: You can <a href="https://code.visualstudio.com/download" target="_blank">download and install VS code</a> here.
-* AWS Account
-* Python version between 3.7 and 3.9. Check the current version using:
-```bash
-#  Mac/Linux/Windows 
-python --version
-```
-You can download a specific release version from <a href="https://www.python.org/downloads/" target="_blank">here</a>.
+To replicate this project, ensure you have the following installed and configured:
 
-* Python package manager - PIP 19.x or higher. PIP is already installed in Python 3 >=3.4 downloaded from python.org . However, you can upgrade to a specific version, say 20.2.3, using the command:
-```bash
-#  Mac/Linux/Windows Check the current version
-pip --version
-# Mac/Linux
-pip install --upgrade pip==20.2.3
-# Windows
-python -m pip install --upgrade pip==20.2.3
-```
-* Terminal
-   * Mac/Linux users can use the default terminal.
-   * Windows users can use either the GitBash terminal or WSL. 
-* Command line utilities:
-  * AWS CLI installed and configured using the `aws configure` command. Another important configuration is the region. Do not use the us-east-1 because the cluster creation may fails mostly in us-east-1. Let's change the default region to:
-  ```bash
-  aws configure set region us-east-2  
-  ```
-  Ensure to create all your resources in a single region. 
-  * EKSCTL installed in your system. Follow the instructions [available here](https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html#installing-eksctl) or <a href="https://eksctl.io/introduction/#installation" target="_blank">here</a> to download and install `eksctl` utility. 
-  * The KUBECTL installed in your system. Installation instructions for kubectl can be found <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/" target="_blank">here</a>. 
+1. **Development Tools**:
+   - Docker Desktop: [Install Docker](https://www.docker.com/products/docker-desktop/).
+   - Git: [Download Git](https://git-scm.com/).
+   - VS Code: [Install VS Code](https://code.visualstudio.com/).
 
+2. **Python Environment**:
+   - Python (Version 3.7 to 3.9): [Download Python](https://www.python.org/downloads/).
+   - PIP (Version 19.x or higher):
+     ```bash
+     pip --version
+     pip install --upgrade pip==20.2.3
+     ```
 
-## Initial setup
+3. **AWS Tools**:
+   - AWS CLI: [Install AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html). Configure it with:
+     ```bash
+     aws configure
+     aws configure set region us-east-2
+     ```
+   - `eksctl`: [Install eksctl](https://eksctl.io/introduction/installation/).
+   - `kubectl`: [Install kubectl](https://kubernetes.io/docs/tasks/tools/).
 
-1. Fork the <a href="https://github.com/udacity/cd0157-Server-Deployment-and-Containerization" target="_blank">Server and Deployment Containerization Github repo</a> to your Github account.
-1. Locally clone your forked version to begin working on the project.
-```bash
-git clone https://github.com/SudKul/cd0157-Server-Deployment-and-Containerization.git
-cd cd0157-Server-Deployment-and-Containerization/
-```
-1. These are the files relevant for the current project:
-```bash
+## Project Objectives
+
+The main objective is to deploy a Flask web application in a containerized environment to a Kubernetes cluster on AWS EKS, ensuring scalability and automation through CI/CD pipelines.
+
+## Project Structure
+
+```plaintext
 .
-├── Dockerfile 
-├── README.md
-├── aws-auth-patch.yml #ToDo
-├── buildspec.yml      #ToDo
-├── ci-cd-codepipeline.cfn.yml #ToDo
-├── iam-role-policy.json  #ToDo
-├── main.py
-├── requirements.txt
-├── simple_jwt_api.yml
-├── test_main.py  #ToDo
-└── trust.json     #ToDo 
+├── Dockerfile                        # Containerization of Flask app
+├── README.md                         # Documentation
+├── aws-auth-patch.yml                # Kubernetes authentication config
+├── buildspec.yml                     # AWS CodeBuild build specification
+├── ci-cd-codepipeline.cfn.yml        # AWS CloudFormation template for CI/CD pipeline
+├── iam-role-policy.json              # IAM policy for AWS CodeBuild/CodePipeline
+├── main.py                           # Flask application entry point
+├── requirements.txt                  # Python dependencies
+├── simple_jwt_api.yml                # Kubernetes deployment configuration
+├── test_main.py                      # Unit tests for the Flask app
+└── trust.json                        # Trust relationship for IAM roles
 ```
 
-     
-## Project Steps
+## Steps to Deploy
 
-Completing the project involves several steps:
+### 1. Fork and Clone the Repository
+Fork this repository to your GitHub account and clone it locally:
+```bash
+git clone https://github.com/<your-username>/Containerized-Flask-App-Deployment-on-AWS-EKS.git
+cd Containerized-Flask-App-Deployment-on-AWS-EKS/
+```
 
-1. Write a Dockerfile for a simple Flask API
-2. Build and test the container locally
-3. Create an EKS cluster
-4. Store a secret using AWS Parameter Store
-5. Create a CodePipeline pipeline triggered by GitHub checkins
-6. Create a CodeBuild stage which will build, test, and deploy your code
+### 2. Build and Test the Container Locally
+1. Build the Docker image:
+   ```bash
+   docker build -t flask-api:latest .
+   ```
+2. Run the container locally:
+   ```bash
+   docker run -p 8080:8080 flask-api:latest
+   ```
 
-For more detail about each of these steps, see the project lesson.
+### 3. Create and Configure an EKS Cluster
+1. Create a Kubernetes cluster using `eksctl`:
+   ```bash
+   eksctl create cluster --name flask-cluster --region us-east-2
+   ```
+2. Apply Kubernetes manifests:
+   ```bash
+   kubectl apply -f simple_jwt_api.yml
+   ```
+
+### 4. Store Secrets in AWS Parameter Store
+Add the JWT secret to AWS Parameter Store:
+```bash
+aws ssm put-parameter --name "JWT_SECRET" --value "<your-secret>" --type "SecureString"
+```
+
+### 5. Set Up CI/CD
+1. Create a pipeline using `ci-cd-codepipeline.cfn.yml`.
+2. Add build specifications in `buildspec.yml` for building, testing, and deploying.
+
+## Outcome
+
+- The Flask application is deployed on a Kubernetes cluster managed by AWS EKS.
+- The application is publicly accessible via an external IP address.
+- A CI/CD pipeline automates testing, building, and deployment.
+
+## Demo
+
+Add screenshots, GIFs, or a link to the deployed app here.
